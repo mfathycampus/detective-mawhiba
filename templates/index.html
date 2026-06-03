@@ -4,11 +4,120 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🔍 المحقق الرقمي — موهبة 2026</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px}
+body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#0d1117;color:#c9d1d9;min-height:100vh;direction:rtl}
+#splash{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:1rem}
+.splash-card{background:#161b22;border:1px solid #30363d;border-radius:16px;padding:2.5rem 2rem;max-width:480px;width:100%;text-align:center}
+.splash-card .logo{font-size:56px;margin-bottom:.5rem}
+.splash-card h1{font-size:2rem;color:#79c0ff;margin-bottom:.3rem}
+.splash-card .sub{color:#8b949e;font-size:.9rem;margin-bottom:1rem}
+.splash-card .story{color:#c9d1d9;font-size:.95rem;line-height:1.7;margin-bottom:1.5rem;background:#0d1117;border-radius:8px;padding:.75rem 1rem}
+.splash-card input{width:100%;padding:.65rem 1rem;border-radius:8px;border:1px solid #30363d;background:#0d1117;color:#c9d1d9;font-size:1rem;text-align:center;margin-bottom:1rem;direction:rtl}
+.splash-card input:focus{outline:none;border-color:#58a6ff}
+.btn-start{width:100%;padding:.75rem;background:#238636;border:none;border-radius:8px;color:#fff;font-size:1rem;cursor:pointer;font-weight:600;transition:background .15s}
+.btn-start:hover{background:#2ea043}
+header{background:#161b22;border-bottom:1px solid #30363d;padding:.6rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;position:sticky;top:0;z-index:100}
+.header-left{display:flex;align-items:center;gap:.5rem}
+.logo-sm{font-size:1.4rem}
+.h-name{color:#79c0ff;font-weight:600;font-size:.95rem}
+.header-stats{display:flex;gap:.5rem;flex-wrap:wrap}
+.stat-pill{background:#0d1117;border:1px solid #30363d;border-radius:20px;padding:.25rem .75rem;font-size:.82rem;color:#8b949e}
+.stat-pill span{color:#c9d1d9;font-weight:600}
+.game-body{display:flex;gap:0;min-height:calc(100vh - 52px)}
+.sidebar{width:240px;min-width:200px;background:#161b22;border-left:1px solid #30363d;padding:1rem;display:flex;flex-direction:column;gap:1rem;overflow-y:auto;max-height:calc(100vh - 52px);position:sticky;top:52px}
+.sidebar h3{color:#79c0ff;font-size:.9rem;border-bottom:1px solid #30363d;padding-bottom:.4rem}
+.main-panel{flex:1;padding:1.25rem;overflow-y:auto;max-width:100%}
+.suspect-card{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:.6rem .75rem;margin-bottom:.5rem}
+.suspect-name{color:#c9d1d9;font-weight:600;font-size:.88rem;margin-bottom:.3rem}
+.suspect-bar-wrap{height:6px;background:#21262d;border-radius:3px;overflow:hidden;margin-bottom:.2rem}
+.suspect-bar{height:100%;border-radius:3px;transition:width .4s;background:#238636}
+.suspect-bar.danger{background:#da3633}
+.suspect-bar.warn{background:#e3b341}
+.suspect-pct{font-size:.75rem;color:#8b949e}
+.action-log{flex:1;overflow:hidden}
+.action-log h4{color:#8b949e;font-size:.78rem;margin-bottom:.4rem}
+.action-log ul{list-style:none;font-size:.78rem;display:flex;flex-direction:column;gap:.25rem}
+.action-log li{color:#8b949e;border-right:2px solid #30363d;padding-right:.4rem;line-height:1.4}
+.tabs{display:flex;gap:.25rem;flex-wrap:wrap;border-bottom:1px solid #30363d;margin-bottom:1.25rem;padding-bottom:.5rem}
+.tab{background:transparent;border:1px solid #30363d;border-radius:6px;padding:.35rem .8rem;color:#8b949e;cursor:pointer;font-size:.82rem;transition:all .15s}
+.tab:hover{border-color:#58a6ff;color:#58a6ff}
+.tab.active{background:#1f3352;border-color:#58a6ff;color:#79c0ff;font-weight:600}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.tab-content h2{color:#79c0ff;font-size:1.1rem;margin-bottom:.4rem}
+.mission-desc{color:#8b949e;font-size:.88rem;margin-bottom:1rem;line-height:1.6}
+.cipher-box{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:.75rem 1rem;margin-bottom:1rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.cipher-label{color:#8b949e;font-size:.82rem;white-space:nowrap}
+.cipher-text{font-family:'Courier New',monospace;font-size:1.1rem;color:#e3b341;letter-spacing:2px;font-weight:600}
+.btn-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem}
+.btn{background:#21262d;border:1px solid #30363d;border-radius:6px;color:#c9d1d9;padding:.45rem .9rem;cursor:pointer;font-size:.85rem;transition:all .15s}
+.btn:hover{background:#30363d;border-color:#8b949e}
+.btn-outline{background:transparent;border:1px solid #30363d;color:#8b949e}
+.btn-outline:hover{border-color:#58a6ff;color:#58a6ff}
+.btn-hint{border-color:#e3b341;color:#e3b341}
+.btn-hint:hover{background:#1c1500}
+.btn-sm{padding:.3rem .65rem;font-size:.8rem}
+.cipher-row{display:flex;align-items:center;gap:.5rem;padding:.25rem .4rem;border-radius:4px;font-family:'Courier New',monospace;font-size:.82rem;margin-bottom:2px}
+.cipher-row.match{background:#0d2018;border:1px solid #1a4a2e}
+.cipher-shift{color:#8b949e;min-width:22px;text-align:left}
+.cipher-decoded{flex:1;color:#c9d1d9}
+.cipher-row.match .cipher-decoded{color:#3fb950;font-weight:600}
+.badge-match{background:#1a4a2e;color:#3fb950;border-radius:4px;padding:1px 6px;font-size:.75rem}
+.search-row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.search-row input{flex:1;min-width:150px;padding:.45rem .75rem;border-radius:6px;border:1px solid #30363d;background:#0d1117;color:#c9d1d9;font-size:.9rem;direction:ltr}
+.search-viz{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:.75rem 1rem}
+.search-node{display:inline-block;background:#21262d;border:1px solid #30363d;border-radius:6px;padding:.3rem .6rem;margin:.2rem;font-family:monospace;font-size:.85rem;color:#c9d1d9}
+.search-node.mid{background:#1f3352;border-color:#58a6ff;color:#79c0ff}
+.search-node.found{background:#0d2018;border-color:#3fb950;color:#3fb950}
+.compare-row{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:.75rem}
+.compare-card{flex:1;min-width:180px;background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:.75rem}
+.compare-card h4{font-size:.85rem;color:#8b949e;margin-bottom:.4rem}
+.compare-card .big{font-size:1.6rem;font-weight:700;color:#79c0ff}
+.compare-card .label{font-size:.75rem;color:#8b949e}
+.clue-card{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:.7rem .9rem;margin-bottom:.5rem;display:flex;align-items:center;gap:.75rem;cursor:pointer;transition:all .15s}
+.clue-card:hover{border-color:#58a6ff;background:#0d1929}
+.clue-card.added{border-color:#3fb950;background:#0d2018;cursor:default}
+.clue-weight-bar{width:6px;border-radius:3px;align-self:stretch;flex-shrink:0}
+.clue-info{flex:1}
+.clue-desc{color:#c9d1d9;font-size:.88rem;margin-bottom:.2rem}
+.clue-meta{font-size:.75rem;color:#8b949e}
+.clue-weight{font-size:.75rem;font-weight:600;white-space:nowrap}
+.pascal-table{border-collapse:collapse;margin:.75rem auto;direction:ltr}
+.pascal-table td{width:44px;height:36px;text-align:center;font-size:.88rem;border-radius:4px;border:1px solid #30363d;color:#8b949e}
+.pascal-table tr:last-child td{background:#1f3352;border-color:#58a6ff;color:#79c0ff;font-weight:600}
+.pascal-result-box{background:#0d1117;border:1px solid #3fb950;border-radius:8px;padding:.75rem 1rem;margin-top:.75rem;font-family:monospace}
+.verdict-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.75rem;margin-bottom:1rem}
+.verdict-card{background:#0d1117;border:1px solid #30363d;border-radius:10px;padding:1rem;text-align:center;cursor:pointer;transition:all .2s}
+.verdict-card:hover{border-color:#58a6ff;transform:translateY(-2px)}
+.verdict-card .vname{font-size:1rem;font-weight:600;color:#c9d1d9;margin-bottom:.3rem}
+.verdict-card .vbar{height:8px;background:#21262d;border-radius:4px;overflow:hidden;margin:.4rem 0}
+.verdict-card .vbar-fill{height:100%;border-radius:4px;background:#238636;transition:width .4s}
+.verdict-card .vpct{font-size:.8rem;color:#8b949e}
+.verdict-result-box{border-radius:10px;padding:1rem 1.25rem}
+.verdict-result-box.correct{background:#0d2018;border:1px solid #3fb950;color:#3fb950}
+.verdict-result-box.wrong{background:#1c0909;border:1px solid #da3633;color:#ff7b72}
+.report-pre{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:1rem;font-family:'Courier New',monospace;font-size:.82rem;white-space:pre;overflow-x:auto;color:#c9d1d9;line-height:1.8}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:200;padding:1rem}
+.modal-card{background:#161b22;border:1px solid #3fb950;border-radius:16px;padding:2rem;max-width:420px;width:100%;text-align:center}
+.win-emoji{font-size:52px;margin-bottom:.5rem}
+.modal-card h2{color:#3fb950;font-size:1.4rem;margin-bottom:.5rem}
+.modal-card p{color:#c9d1d9;margin-bottom:1rem;line-height:1.6}
+.win-stats{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1.25rem}
+.win-stat{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:.5rem}
+.win-stat .ws-label{font-size:.75rem;color:#8b949e;margin-bottom:.2rem}
+.win-stat .ws-val{font-size:1.2rem;font-weight:700;color:#79c0ff}
+.hidden{display:none!important}
+.mt1{margin-top:.75rem}
+.row-center{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+.result-box{background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:.65rem .9rem;font-family:monospace;font-size:.88rem}
+.ok{color:#3fb950}.warn-c{color:#e3b341}.err{color:#ff7b72}
+@media(max-width:640px){.sidebar{display:none}.game-body{flex-direction:column}.main-panel{padding:.75rem}.tabs{gap:.2rem}.tab{padding:.3rem .6rem;font-size:.76rem}}
+</style>
 </head>
 <body>
 
-<!-- ═══ SPLASH SCREEN ═══ -->
 <div id="splash">
   <div class="splash-card">
     <div class="logo">🔍</div>
@@ -20,10 +129,7 @@
   </div>
 </div>
 
-<!-- ═══ MAIN GAME ═══ -->
 <div id="game" class="hidden">
-
-  <!-- Header -->
   <header>
     <div class="header-left">
       <span class="logo-sm">🔍</span>
@@ -36,11 +142,7 @@
       <span class="stat-pill">💡 <span id="h-hints">3</span> تلميح</span>
     </div>
   </header>
-
-  <!-- Body -->
   <div class="game-body">
-
-    <!-- Sidebar: suspects -->
     <aside class="sidebar">
       <h3>ملفات المشتبهين</h3>
       <div id="suspects-list"></div>
@@ -49,11 +151,7 @@
         <ul id="action-log"></ul>
       </div>
     </aside>
-
-    <!-- Main panel -->
     <main class="main-panel">
-
-      <!-- Mission tabs -->
       <nav class="tabs">
         <button class="tab active" data-tab="cipher">🔐 فك التشفير</button>
         <button class="tab" data-tab="search">🔍 البحث</button>
@@ -62,86 +160,70 @@
         <button class="tab" data-tab="verdict">⚖ الحكم</button>
         <button class="tab" data-tab="report">💾 التقرير</button>
       </nav>
-
-      <!-- Tab: Cipher -->
       <section id="tab-cipher" class="tab-content active">
         <h2>🔐 مهمة 1 — فك تشفير الرسالة السرية</h2>
         <p class="mission-desc">وجدنا هذه الرسالة في مسرح الجريمة. هي مشفرة بشيفرة قيصر.</p>
         <div class="cipher-box">
           <span class="cipher-label">الرسالة المشفرة:</span>
-          <div class="cipher-text" id="secret-msg">PHKWDU LV DW WKH OLEUDUB</div>
+          <div class="cipher-text">PHKWDU LV DW WKH OLEUDUB</div>
         </div>
         <div class="btn-row">
-          <button class="btn" onclick="cipherAuto()">🤖 كسر تلقائي (جرّب كل الإزاحات)</button>
-          <button class="btn btn-outline" onclick="showManual()">✏️ جرّب إزاحة محددة</button>
-          <button class="btn btn-hint" onclick="cipherHint()">💡 تلميح (-10 نقاط)</button>
+          <button class="btn" onclick="cipherAuto()">🤖 كسر تلقائي</button>
+          <button class="btn btn-outline" onclick="showManual()">✏️ جرّب إزاحة</button>
+          <button class="btn btn-hint" onclick="cipherHint()">💡 تلميح (-10)</button>
         </div>
         <div id="manual-input" class="hidden mt1">
-          <label>الإزاحة (1-25):</label>
-          <input type="number" id="shift-val" min="1" max="25" value="3" style="width:80px">
+          <label style="color:#8b949e;font-size:.88rem">الإزاحة (1-25):</label>
+          <input type="number" id="shift-val" min="1" max="25" value="3" style="width:80px;padding:.3rem;border-radius:6px;border:1px solid #30363d;background:#0d1117;color:#c9d1d9;margin:0 .5rem">
           <button class="btn btn-sm" onclick="cipherManual()">جرّب</button>
-          <div id="manual-result" class="result-box hidden"></div>
+          <div id="manual-result" class="result-box hidden mt1"></div>
         </div>
         <div id="cipher-results" class="hidden mt1"></div>
       </section>
-
-      <!-- Tab: Search -->
       <section id="tab-search" class="tab-content hidden">
         <h2>🔍 مهمة 2 — البحث في قاعدة المشتبهين</h2>
         <p class="mission-desc">ابحث عن مشتبه وقارن سرعة البحث الخطي والثنائي.</p>
         <div class="search-row">
-          <input type="text" id="search-input" placeholder="اسم المشتبه..." list="suspects-datalist">
-          <datalist id="suspects-datalist">
-            <option value="Mehtar"><option value="Lena"><option value="Omar"><option value="Sara">
-          </datalist>
-          <button class="btn" onclick="doSearch('binary')">🔍 بحث ثنائي</button>
-          <button class="btn btn-outline" onclick="doSearch('linear')">🐢 بحث خطي</button>
+          <input type="text" id="search-input" placeholder="اسم المشتبه (Mehtar, Lena, Omar, Sara)" list="susp-list">
+          <datalist id="susp-list"><option value="Mehtar"><option value="Lena"><option value="Omar"><option value="Sara"></datalist>
+          <button class="btn" onclick="doSearch('binary')">🔍 ثنائي</button>
+          <button class="btn btn-outline" onclick="doSearch('linear')">🐢 خطي</button>
           <button class="btn btn-outline" onclick="doSearch('both')">📊 قارن</button>
         </div>
         <div id="search-result" class="mt1"></div>
         <div id="search-viz" class="search-viz hidden mt1"></div>
       </section>
-
-      <!-- Tab: Clues -->
       <section id="tab-clues" class="tab-content hidden">
         <h2>🔬 مهمة 3 — تحليل الأدلة</h2>
         <p class="mission-desc">الأدلة مرتبة تنازلياً حسب الأهمية. اضغط لإضافة دليل لملف المشتبه.</p>
         <div id="clues-list"></div>
       </section>
-
-      <!-- Tab: Pascal -->
       <section id="tab-pascal" class="tab-content hidden">
         <h2>🔺 مهمة 4 — مثلث باسكال كمفتاح تشفير</h2>
         <p class="mission-desc">مجموع الصف الأخير mod 26 يعطي مفتاح تشفير ثانٍ.</p>
         <div class="row-center mt1">
-          <label>عدد الصفوف:</label>
+          <label style="color:#8b949e;font-size:.88rem">عدد الصفوف:</label>
           <input type="range" id="pascal-rows" min="3" max="8" value="5" oninput="document.getElementById('pascal-rows-val').textContent=this.value" style="width:140px">
-          <span id="pascal-rows-val">5</span>
+          <span id="pascal-rows-val" style="color:#c9d1d9;min-width:16px">5</span>
           <button class="btn btn-sm" onclick="doPascal()">احسب</button>
         </div>
         <div id="pascal-result" class="mt1"></div>
       </section>
-
-      <!-- Tab: Verdict -->
       <section id="tab-verdict" class="tab-content hidden">
         <h2>⚖ مهمة 5 — إصدار الحكم النهائي</h2>
-        <p class="mission-desc">من هو المجرم؟ اختر بناءً على ما جمعته من أدلة. الحكم الخاطئ يخفض نقاطك 20!</p>
+        <p class="mission-desc">من هو المجرم؟ الحكم الخاطئ يخفض نقاطك 20!</p>
         <div id="verdict-suspects" class="verdict-grid"></div>
         <div id="verdict-result" class="hidden mt1"></div>
       </section>
-
-      <!-- Tab: Report -->
       <section id="tab-report" class="tab-content hidden">
         <h2>💾 تقرير التحقيق</h2>
         <button class="btn" onclick="loadReport()">📋 أنشئ التقرير</button>
         <pre id="report-content" class="report-pre hidden mt1"></pre>
       </section>
-
     </main>
   </div>
 </div>
 
-<!-- Win Modal -->
 <div id="win-modal" class="modal hidden">
   <div class="modal-card">
     <div class="win-emoji">🏆</div>
@@ -152,6 +234,155 @@
   </div>
 </div>
 
-<script src="{{ url_for('static', filename='js/game.js') }}"></script>
+<script>
+let timer=null;
+async function startGame(){
+  const name=document.getElementById('detective-name').value.trim()||'محقق مجهول';
+  const res=await api('/api/start',{name});
+  if(!res||!res.ok)return;
+  document.getElementById('splash').classList.add('hidden');
+  document.getElementById('game').classList.remove('hidden');
+  document.getElementById('h-name').textContent=name;
+  renderClues();renderVerdictCards();
+  await refreshState();
+  timer=setInterval(refreshState,3000);
+}
+async function api(url,body=null){
+  const opts=body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:{method:'GET'};
+  try{const res=await fetch(url,opts);if(!res.ok)return null;return res.json();}catch(e){return null;}
+}
+async function refreshState(){
+  const g=await api('/api/state');
+  if(!g||g.error)return;
+  document.getElementById('h-time').textContent=g.elapsed;
+  document.getElementById('h-score').textContent=g.score;
+  document.getElementById('h-clues').textContent=g.clues.length;
+  document.getElementById('h-hints').textContent=3-g.hints;
+  renderSuspects(g.suspects);renderLog(g.actions);
+}
+function renderSuspects(suspects){
+  const list=document.getElementById('suspects-list');
+  const sorted=[...suspects].sort((a,b)=>b.suspicion-a.suspicion);
+  list.innerHTML=sorted.map(s=>{
+    const cls=s.suspicion>=70?'danger':s.suspicion>=40?'warn':'';
+    return`<div class="suspect-card"><div class="suspect-name">${s.name} <small style="color:#8b949e;font-weight:400">${s.location}</small></div><div class="suspect-bar-wrap"><div class="suspect-bar ${cls}" style="width:${s.suspicion}%"></div></div><div class="suspect-pct">${s.suspicion}% اشتباه · ${s.evidence.length} دليل</div></div>`;
+  }).join('');
+}
+function renderLog(actions){
+  document.getElementById('action-log').innerHTML=[...actions].reverse().map(a=>`<li>${a}</li>`).join('');
+}
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(s=>{s.classList.add('hidden');s.classList.remove('active');});
+    btn.classList.add('active');
+    const sec=document.getElementById('tab-'+btn.dataset.tab);
+    sec.classList.remove('hidden');sec.classList.add('active');
+    if(btn.dataset.tab==='verdict')refreshVerdictBars();
+  });
+});
+async function cipherAuto(){
+  const res=await api('/api/cipher',{mode:'auto'});if(!res)return;
+  const container=document.getElementById('cipher-results');
+  container.classList.remove('hidden');
+  const rows=res.results.map(r=>`<div class="cipher-row ${r.match?'match':''}"><span class="cipher-shift">${r.shift}</span><span class="cipher-decoded">${r.decoded}</span>${r.match?'<span class="badge-match">✓ منطقي</span>':''}</div>`).join('');
+  container.innerHTML=`<p style="font-size:.82rem;color:#8b949e;margin-bottom:.4rem">جميع الإزاحات (25 احتمالاً):</p>${rows}<div class="result-box mt1 ok">✅ الإزاحة الصحيحة: <strong>${res.correct}</strong> → <strong>${res.decoded}</strong></div>`;
+  await refreshState();
+}
+function showManual(){document.getElementById('manual-input').classList.toggle('hidden');}
+async function cipherManual(){
+  const shift=parseInt(document.getElementById('shift-val').value)||0;
+  const res=await api('/api/cipher',{mode:'manual',shift});if(!res)return;
+  const el=document.getElementById('manual-result');
+  el.classList.remove('hidden');
+  el.className=`result-box ${res.correct?'ok':'err'}`;
+  el.innerHTML=`الإزاحة ${shift}: <strong>${res.decoded}</strong> ${res.correct?'✅ صحيح!':'✗ خطأ، حاول مرة أخرى'}`;
+  await refreshState();
+}
+async function cipherHint(){
+  const res=await api('/api/cipher',{mode:'hint'});if(!res)return;
+  if(res.error){alert('لا تلميحات متبقية!');return;}
+  alert(`💡 تلميح: ${res.hint}\n(تلميحات متبقية: ${res.hints_left})`);
+  await refreshState();
+}
+async function doSearch(mode){
+  const target=document.getElementById('search-input').value.trim();
+  if(!target){alert('أدخل اسماً للبحث');return;}
+  if(mode==='both'){
+    const [rb,rl]=await Promise.all([api('/api/search',{target,mode:'binary'}),api('/api/search',{target,mode:'linear'})]);
+    if(!rb||!rl)return;
+    renderSearchViz(rb.names,target,rb.path||[]);
+    document.getElementById('search-result').innerHTML=`<div class="compare-row"><div class="compare-card"><h4>🔍 البحث الثنائي O(log n)</h4><div class="big">${rb.steps}</div><div class="label">خطوات للوصول لـ ${target}</div><div style="margin-top:.4rem;font-size:.8rem;color:${rb.found?'#3fb950':'#ff7b72'}">${rb.found?`✅ وجدناه في الموقع [${rb.index}]`:'✗ غير موجود'}</div></div><div class="compare-card"><h4>🐢 البحث الخطي O(n)</h4><div class="big">${rl.steps}</div><div class="label">خطوات للوصول لـ ${target}</div><div style="margin-top:.4rem;font-size:.8rem;color:${rl.found?'#3fb950':'#ff7b72'}">${rl.found?`✅ وجدناه في الموقع [${rl.index}]`:'✗ غير موجود'}</div></div></div><p style="font-size:.8rem;color:#8b949e;margin-top:.5rem">البحث الثنائي أسرع بـ <strong style="color:#79c0ff">${Math.round(rl.steps/Math.max(rb.steps,1))}×</strong> مع قائمة مرتبة</p>`;
+    await refreshState();return;
+  }
+  const res=await api('/api/search',{target,mode});if(!res)return;
+  renderSearchViz(res.names,target,res.path||[]);
+  document.getElementById('search-result').innerHTML=`<div class="result-box ${res.found?'ok':'err'}">${res.found?`✅ وجدنا <strong>${target}</strong> في الموقع [${res.index}] بعد <strong>${res.steps}</strong> خطوة`:`✗ <strong>${target}</strong> غير موجود — البحث احتاج ${res.steps} خطوة`}</div>`;
+  await refreshState();
+}
+function renderSearchViz(names,target,path){
+  const viz=document.getElementById('search-viz');viz.classList.remove('hidden');
+  viz.innerHTML=`<p style="font-size:.78rem;color:#8b949e;margin-bottom:.5rem">القائمة المرتبة أبجدياً:</p><div style="display:flex;flex-wrap:wrap;gap:.25rem">${names.map(n=>`<span class="search-node ${n===target?'found':path.includes(n)?'mid':''}">${n}</span>`).join('')}</div><p style="font-size:.75rem;color:#8b949e;margin-top:.4rem"><span style="color:#79c0ff">■</span> فُحص  <span style="color:#3fb950">■</span> وجدناه</p>`;
+}
+const CLUES_DATA=[
+  {desc:"رسالة مشفرة على الطاولة",suspect:"Mehtar",weight:45,added:false},
+  {desc:"بصمة أصابع في المكتبة",suspect:"Mehtar",weight:35,added:false},
+  {desc:"كتاب عن التشفير بجيبه",suspect:"Mehtar",weight:25,added:false},
+  {desc:"شهادة شاهد عيان",suspect:"Lena",weight:20,added:false},
+  {desc:"كاميرا أمنية عند الباب",suspect:"Omar",weight:15,added:false},
+];
+function renderClues(){
+  document.getElementById('clues-list').innerHTML=CLUES_DATA.map((c,i)=>{
+    const col=c.weight>=40?'#da3633':c.weight>=25?'#e3b341':'#238636';
+    return`<div class="clue-card ${c.added?'added':''}" onclick="addClue(${i})"><div class="clue-weight-bar" style="background:${col};min-height:36px"></div><div class="clue-info"><div class="clue-desc">${c.desc}</div><div class="clue-meta">يشير إلى: <strong>${c.suspect}</strong></div></div><div class="clue-weight" style="color:${col}">+${c.weight}%</div>${c.added?'<span style="color:#3fb950;font-size:.8rem">✓</span>':''}</div>`;
+  }).join('');
+}
+async function addClue(idx){
+  if(CLUES_DATA[idx].added)return;
+  const res=await api('/api/clue',{index:idx});if(!res||res.error)return;
+  CLUES_DATA[idx].added=true;renderClues();await refreshState();
+}
+async function doPascal(){
+  const rows=parseInt(document.getElementById('pascal-rows').value);
+  const res=await api('/api/pascal',{rows});if(!res)return;
+  const table=res.triangle.map((row,ri)=>`<tr>${row.map(n=>`<td>${n}</td>`).join('')}</tr>`).join('');
+  document.getElementById('pascal-result').innerHTML=`<table class="pascal-table">${table}</table><div class="pascal-result-box"><span class="ok">مجموع الصف الأخير:</span> ${res.last_row_sum} mod 26 = <strong style="color:#79c0ff">${res.key}</strong><br><span class="warn-c">تجربة مفتاح ${res.key} على الرسالة:</span><br><code style="color:#c9d1d9">${res.decoded}</code>${res.key===3?'<br><span class="ok">✅ هذا هو المفتاح الصحيح!</span>':''}</div>`;
+  await refreshState();
+}
+function renderVerdictCards(){
+  document.getElementById('verdict-suspects').innerHTML=['Mehtar','Lena','Omar','Sara'].map(name=>`<div class="verdict-card" onclick="castVerdict('${name}')"><div style="font-size:2rem;margin-bottom:.4rem">🕵️</div><div class="vname">${name}</div><div class="vbar"><div class="vbar-fill" id="vbar-${name}" style="width:0%"></div></div><div class="vpct" id="vpct-${name}">0% اشتباه</div></div>`).join('');
+}
+async function refreshVerdictBars(){
+  const g=await api('/api/state');if(!g)return;
+  g.suspects.forEach(s=>{
+    const bar=document.getElementById('vbar-'+s.name);
+    const pct=document.getElementById('vpct-'+s.name);
+    if(bar){bar.style.width=s.suspicion+'%';bar.style.background=s.suspicion>=70?'#da3633':s.suspicion>=40?'#e3b341':'#238636';}
+    if(pct)pct.textContent=s.suspicion+'% اشتباه';
+  });
+}
+async function castVerdict(name){
+  if(!confirm(`هل أنت متأكد أن ${name} هو المجرم؟`))return;
+  const res=await api('/api/verdict',{choice:name});if(!res)return;
+  const box=document.getElementById('verdict-result');
+  box.classList.remove('hidden','correct','wrong');
+  box.classList.add('verdict-result-box',res.correct?'correct':'wrong');
+  box.innerHTML=res.msg;
+  if(res.correct)showWin(res);
+  await refreshState();
+}
+function showWin(res){
+  document.getElementById('win-title').textContent='🏆 أحسنت أيها المحقق!';
+  document.getElementById('win-msg').textContent=res.msg;
+  document.getElementById('win-stats').innerHTML=`<div class="win-stat"><div class="ws-label">النقاط</div><div class="ws-val">${res.score}</div></div><div class="win-stat"><div class="ws-label">الوقت</div><div class="ws-val">${res.elapsed||'-'}</div></div><div class="win-stat"><div class="ws-label">التلميحات</div><div class="ws-val">${res.hints_used}/3</div></div><div class="win-stat"><div class="ws-label">التحدي</div><div class="ws-val">${res.hints_used===0?'★★★★★':res.hints_used===1?'★★★★☆':'★★★☆☆'}</div></div>`;
+  document.getElementById('win-modal').classList.remove('hidden');
+}
+function closeModal(){document.getElementById('win-modal').classList.add('hidden');}
+async function loadReport(){
+  const res=await api('/api/report');if(!res)return;
+  const pre=document.getElementById('report-content');
+  pre.textContent=res.report;pre.classList.remove('hidden');
+}
+</script>
 </body>
 </html>
