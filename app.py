@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, jsonify, session
 import random, time, json, os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=None)
 app.secret_key = os.environ.get("SECRET_KEY", "mawhiba-detective-2026")
 
 # ══════════════════════════════════════════
