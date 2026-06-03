@@ -1,0 +1,295 @@
+/* ══ State ══ */
+let timer = null;
+
+/* ══ Start ══ */
+async function startGame() {
+  const name = document.getElementById('detective-name').value.trim() || 'محقق مجهول';
+  const res = await api('/api/start', {name});
+  if (!res.ok) return;
+  document.getElementById('splash').classList.add('hidden');
+  document.getElementById('game').classList.remove('hidden');
+  document.getElementById('h-name').textContent = name;
+  renderClues();
+  renderVerdictCards();
+  await refreshState();
+  timer = setInterval(refreshState, 3000);
+}
+
+/* ══ API helper ══ */
+async function api(url, body = null) {
+  const opts = body
+    ? {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)}
+    : {method:'GET'};
+  const res = await fetch(url, opts);
+  if (!res.ok) return null;
+  return res.json();
+}
+
+/* ══ State refresh ══ */
+async function refreshState() {
+  const g = await api('/api/state');
+  if (!g || g.error) return;
+  document.getElementById('h-time').textContent  = g.elapsed;
+  document.getElementById('h-score').textContent = g.score;
+  document.getElementById('h-clues').textContent = g.clues.length;
+  document.getElementById('h-hints').textContent = 3 - g.hints;
+  renderSuspects(g.suspects);
+  renderLog(g.actions);
+}
+
+/* ══ Suspects sidebar ══ */
+function renderSuspects(suspects) {
+  const list = document.getElementById('suspects-list');
+  const sorted = [...suspects].sort((a,b) => b.suspicion - a.suspicion);
+  list.innerHTML = sorted.map(s => {
+    const cls = s.suspicion >= 70 ? 'danger' : s.suspicion >= 40 ? 'warn' : '';
+    return `<div class="suspect-card">
+      <div class="suspect-name">${s.name} <small style="color:#8b949e;font-weight:400">${s.location}</small></div>
+      <div class="suspect-bar-wrap"><div class="suspect-bar ${cls}" style="width:${s.suspicion}%"></div></div>
+      <div class="suspect-pct">${s.suspicion}% اشتباه · ${s.evidence.length} دليل</div>
+    </div>`;
+  }).join('');
+}
+
+/* ══ Action log ══ */
+function renderLog(actions) {
+  const ul = document.getElementById('action-log');
+  ul.innerHTML = [...actions].reverse().map(a => `<li>${a}</li>`).join('');
+}
+
+/* ══ Tabs ══ */
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(s => s.classList.add('hidden'));
+    btn.classList.add('active');
+    document.getElementById(`tab-${btn.dataset.tab}`).classList.remove('hidden');
+    document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+  });
+});
+
+/* ══ CIPHER ══ */
+async function cipherAuto() {
+  const res = await api('/api/cipher', {mode:'auto'});
+  if (!res) return;
+  const container = document.getElementById('cipher-results');
+  container.classList.remove('hidden');
+  const rows = res.results.map(r => `
+    <div class="cipher-row ${r.match ? 'match' : ''}">
+      <span class="cipher-shift">${r.shift}</span>
+      <span class="cipher-decoded">${r.decoded}</span>
+      ${r.match ? '<span class="badge-match">✓ منطقي</span>' : ''}
+    </div>`).join('');
+  container.innerHTML = `
+    <p style="font-size:.82rem;color:#8b949e;margin-bottom:.4rem">جميع الإزاحات المحتملة:</p>
+    ${rows}
+    <div class="result-box mt1 ok">✅ الإزاحة الصحيحة: <strong>${res.correct}</strong> → <strong>${res.decoded}</strong></div>`;
+  await refreshState();
+}
+
+function showManual() {
+  document.getElementById('manual-input').classList.toggle('hidden');
+}
+
+async function cipherManual() {
+  const shift = parseInt(document.getElementById('shift-val').value) || 0;
+  const res   = await api('/api/cipher', {mode:'manual', shift});
+  if (!res) return;
+  const el = document.getElementById('manual-result');
+  el.classList.remove('hidden');
+  el.className = `result-box ${res.correct ? 'ok' : 'err'}`;
+  el.innerHTML = `الإزاحة ${shift}: <strong>${res.decoded}</strong> ${res.correct ? '✅ صحيح!' : '✗ خطأ، حاول مرة أخرى'}`;
+  await refreshState();
+}
+
+async function cipherHint() {
+  const res = await api('/api/cipher', {mode:'hint'});
+  if (!res) return;
+  if (res.error) { alert('لا تلميحات متبقية!'); return; }
+  alert(`💡 تلميح: ${res.hint}\n(تلميحات متبقية: ${res.hints_left})`);
+  await refreshState();
+}
+
+/* ══ SEARCH ══ */
+async function doSearch(mode) {
+  const target = document.getElementById('search-input').value.trim();
+  if (!target) { alert('أدخل اسماً للبحث'); return; }
+
+  if (mode === 'both') {
+    const [rb, rl] = await Promise.all([
+      api('/api/search', {target, mode:'binary'}),
+      api('/api/search', {target, mode:'linear'}),
+    ]);
+    if (!rb || !rl) return;
+    renderSearchViz(rb.names, target, rb.path);
+    document.getElementById('search-result').innerHTML = `
+      <div class="compare-row">
+        <div class="compare-card">
+          <h4>🔍 البحث الثنائي O(log n)</h4>
+          <div class="big">${rb.steps}</div>
+          <div class="label">خطوات للوصول لـ ${target}</div>
+          <div style="margin-top:.4rem;font-size:.8rem;color:${rb.found?'#3fb950':'#ff7b72'}">
+            ${rb.found ? `✅ وجدناه في الموقع [${rb.index}]` : '✗ غير موجود'}
+          </div>
+        </div>
+        <div class="compare-card">
+          <h4>🐢 البحث الخطي O(n)</h4>
+          <div class="big">${rl.steps}</div>
+          <div class="label">خطوات للوصول لـ ${target}</div>
+          <div style="margin-top:.4rem;font-size:.8rem;color:${rl.found?'#3fb950':'#ff7b72'}">
+            ${rl.found ? `✅ وجدناه في الموقع [${rl.index}]` : '✗ غير موجود'}
+          </div>
+        </div>
+      </div>
+      <p style="font-size:.8rem;color:#8b949e;margin-top:.5rem">
+        البحث الثنائي أسرع بـ <strong style="color:#79c0ff">${Math.round(rl.steps/Math.max(rb.steps,1))}×</strong> مع قائمة مرتبة
+      </p>`;
+    await refreshState();
+    return;
+  }
+
+  const res = await api('/api/search', {target, mode});
+  if (!res) return;
+  renderSearchViz(res.names, target, res.path || []);
+  document.getElementById('search-result').innerHTML = `
+    <div class="result-box ${res.found ? 'ok' : 'err'}">
+      ${res.found ? `✅ وجدنا <strong>${target}</strong> في الموقع [${res.index}] بعد <strong>${res.steps}</strong> خطوة`
+                  : `✗ <strong>${target}</strong> غير موجود — البحث احتاج ${res.steps} خطوة`}
+    </div>`;
+  await refreshState();
+}
+
+function renderSearchViz(names, target, path) {
+  const viz = document.getElementById('search-viz');
+  viz.classList.remove('hidden');
+  viz.innerHTML = `<p style="font-size:.78rem;color:#8b949e;margin-bottom:.5rem">القائمة المرتبة أبجدياً (العناصر المحاطة = ما تم فحصه):</p>
+    <div style="display:flex;flex-wrap:wrap;gap:.25rem">
+    ${names.map(n => {
+      const isMid  = path.includes(n) && n !== target;
+      const isFound = n === target;
+      return `<span class="search-node ${isFound ? 'found' : isMid ? 'mid' : ''}">${n}</span>`;
+    }).join('')}
+    </div>
+    <p style="font-size:.75rem;color:#8b949e;margin-top:.4rem">
+      <span style="color:#79c0ff">■</span> فُحص  <span style="color:#3fb950">■</span> وجدناه
+    </p>`;
+}
+
+/* ══ CLUES ══ */
+const CLUES_DATA = [
+  {desc:"رسالة مشفرة على الطاولة",  suspect:"Mehtar", weight:45, added:false},
+  {desc:"بصمة أصابع في المكتبة",    suspect:"Mehtar", weight:35, added:false},
+  {desc:"كتاب عن التشفير بجيبه",    suspect:"Mehtar", weight:25, added:false},
+  {desc:"شهادة شاهد عيان",           suspect:"Lena",   weight:20, added:false},
+  {desc:"كاميرا أمنية عند الباب",    suspect:"Omar",   weight:15, added:false},
+];
+
+function renderClues() {
+  const list = document.getElementById('clues-list');
+  list.innerHTML = CLUES_DATA.map((c, i) => {
+    const barColor = c.weight >= 40 ? '#da3633' : c.weight >= 25 ? '#e3b341' : '#238636';
+    return `<div class="clue-card ${c.added ? 'added' : ''}" id="clue-${i}" onclick="addClue(${i})">
+      <div class="clue-weight-bar" style="background:${barColor};width:6px;min-height:36px"></div>
+      <div class="clue-info">
+        <div class="clue-desc">${c.desc}</div>
+        <div class="clue-meta">يشير إلى: <strong>${c.suspect}</strong></div>
+      </div>
+      <div class="clue-weight" style="color:${barColor}">+${c.weight}%</div>
+      ${c.added ? '<span style="color:#3fb950;font-size:.8rem">✓ أُضيف</span>' : ''}
+    </div>`;
+  }).join('');
+}
+
+async function addClue(idx) {
+  if (CLUES_DATA[idx].added) return;
+  const res = await api('/api/clue', {index: idx});
+  if (!res || res.error) return;
+  CLUES_DATA[idx].added = true;
+  renderClues();
+  await refreshState();
+}
+
+/* ══ PASCAL ══ */
+async function doPascal() {
+  const rows = parseInt(document.getElementById('pascal-rows').value);
+  const res  = await api('/api/pascal', {rows});
+  if (!res) return;
+  const table = res.triangle.map((row, ri) => {
+    const isLast = ri === res.triangle.length - 1;
+    const cells  = row.map(n => `<td ${isLast ? '' : ''}>${n}</td>`).join('');
+    return `<tr>${cells}</tr>`;
+  }).join('');
+  document.getElementById('pascal-result').innerHTML = `
+    <table class="pascal-table">${table}</table>
+    <div class="pascal-result-box">
+      <span class="ok">مجموع الصف الأخير:</span> ${res.last_row_sum} mod 26 = <strong style="color:#79c0ff">${res.key}</strong>
+      <br><span class="warn">تجربة مفتاح ${res.key} على الرسالة:</span>
+      <br><code style="color:#c9d1d9">${res.decoded}</code>
+      ${res.key === 3 ? '<br><span class="ok">✅ هذا هو المفتاح الصحيح!</span>' : ''}
+    </div>`;
+  await refreshState();
+}
+
+/* ══ VERDICT ══ */
+function renderVerdictCards() {
+  const grid = document.getElementById('verdict-suspects');
+  const names = ['Mehtar','Lena','Omar','Sara'];
+  grid.innerHTML = names.map(name => `
+    <div class="verdict-card" onclick="castVerdict('${name}')">
+      <div style="font-size:2rem;margin-bottom:.4rem">🕵️</div>
+      <div class="vname">${name}</div>
+      <div class="vbar"><div class="vbar-fill" id="vbar-${name}" style="width:0%"></div></div>
+      <div class="vpct" id="vpct-${name}">0% اشتباه</div>
+    </div>`).join('');
+}
+
+async function refreshVerdictBars() {
+  const g = await api('/api/state');
+  if (!g) return;
+  g.suspects.forEach(s => {
+    const bar = document.getElementById(`vbar-${s.name}`);
+    const pct = document.getElementById(`vpct-${s.name}`);
+    if (bar) { bar.style.width = s.suspicion + '%'; bar.style.background = s.suspicion >= 70 ? '#da3633' : s.suspicion >= 40 ? '#e3b341' : '#238636'; }
+    if (pct) pct.textContent = `${s.suspicion}% اشتباه`;
+  });
+}
+
+document.querySelector('[data-tab="verdict"]')?.addEventListener('click', refreshVerdictBars);
+
+async function castVerdict(name) {
+  if (!confirm(`هل أنت متأكد أن ${name} هو المجرم؟`)) return;
+  const res = await api('/api/verdict', {choice: name});
+  if (!res) return;
+  const box = document.getElementById('verdict-result');
+  box.classList.remove('hidden', 'correct', 'wrong');
+  box.classList.add('verdict-result-box', res.correct ? 'correct' : 'wrong');
+  box.innerHTML = res.msg;
+  if (res.correct) {
+    showWin(res);
+  }
+  await refreshState();
+}
+
+function showWin(res) {
+  document.getElementById('win-title').textContent = '🏆 أحسنت أيها المحقق!';
+  document.getElementById('win-msg').textContent   = res.msg;
+  document.getElementById('win-stats').innerHTML = `
+    <div class="win-stat"><div class="ws-label">النقاط النهائية</div><div class="ws-val">${res.score}</div></div>
+    <div class="win-stat"><div class="ws-label">الوقت</div><div class="ws-val">${res.elapsed || '-'}</div></div>
+    <div class="win-stat"><div class="ws-label">التلميحات</div><div class="ws-val">${res.hints_used}/3</div></div>
+    <div class="win-stat"><div class="ws-label">التحدي</div><div class="ws-val">${res.hints_used === 0 ? '★★★★★' : res.hints_used === 1 ? '★★★★☆' : '★★★☆☆'}</div></div>`;
+  document.getElementById('win-modal').classList.remove('hidden');
+}
+
+function closeModal() {
+  document.getElementById('win-modal').classList.add('hidden');
+}
+
+/* ══ REPORT ══ */
+async function loadReport() {
+  const res = await api('/api/report');
+  if (!res) return;
+  const pre = document.getElementById('report-content');
+  pre.textContent = res.report;
+  pre.classList.remove('hidden');
+}
